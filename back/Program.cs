@@ -1,9 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using sistema_gerenciamento_tarefas.Data;
+using sistema_gerenciamento_tarefas.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("ConexaoPadrao")
+    ));
+
+builder.Services.AddScoped<IUsuariaRepository, UsuariaRepository>();
+builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
