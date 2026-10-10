@@ -1,20 +1,31 @@
+using Microsoft.EntityFrameworkCore;
+using sistema_gerenciamento_tarefas.Data;
+using sistema_gerenciamento_tarefas.Data.Repositories.Tarefas;
 using sistema_gerenciamento_tarefas.Data.Repositories.Usuarias;
+using sistema_gerenciamento_tarefas.Services.Tarefas;
 using sistema_gerenciamento_tarefas.Services.Usuarias;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("ConexaoPadrao")
+    ));
+
+builder.Services.AddScoped<IUsuariaRepository, UsuariaRepository>();
+builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 //**********BANCO EM MEMORIA**********************
-builder.Services.AddSingleton<IUsuariaRepository, UsuariaRepositoryInMemory>();
+//builder.Services.AddSingleton<IUsuariaRepository, UsuariaRepositoryInMemory>();
 //**********BANCO EM MEMORIA**********************
 
 builder.Services.AddScoped<IUsuariaService, UsuariaService>();
+builder.Services.AddScoped<ITarefaService, TarefaService>();
 
 var app = builder.Build();
 
