@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using sistema_gerenciamento_tarefas.Data.Repositories.Usuarias;
 using sistema_gerenciamento_tarefas.Services.Usuarias;
+using sistema_gerenciamento_tarefas.Data;
+using sistema_gerenciamento_tarefas.Data.Repositories.Tarefas;
 
 var builder = WebApplication.CreateBuilder(args);
 
