@@ -1,10 +1,9 @@
-﻿namespace sistema_gerenciamento_tarefas.Models
+﻿namespace sistema_gerenciamento_tarefas.DTOs.Usuarios.Responses
 {
-    public class Usuaria
+    public class UsuarioResponse
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Senha { get; set; } = "12345";
     }
 }
