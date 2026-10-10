@@ -20,7 +20,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 //**********BANCO EM MEMORIA**********************
-builder.Services.AddSingleton<IUsuariaRepository, UsuariaRepositoryInMemory>();
+//builder.Services.AddSingleton<IUsuariaRepository, UsuariaRepositoryInMemory>();
 //**********BANCO EM MEMORIA**********************
 
 builder.Services.AddScoped<IUsuariaService, UsuariaService>();
