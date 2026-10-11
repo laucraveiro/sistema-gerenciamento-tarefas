@@ -1,4 +1,6 @@
-﻿namespace sistema_gerenciamento_tarefas.Models
+﻿using sistema_gerenciamento_tarefas.Models.Enums;
+
+namespace sistema_gerenciamento_tarefas.Models
 {
     public class Tarefa
     {
@@ -6,7 +8,7 @@
         public string Titulo { get; set; } = string.Empty;
         public string Descricao { get; set; } = string.Empty;
         public DateTime DataVencimento { get; set; }
-        public string Status { get; set; } = "Pendente";
+        public StatusTarefa Status { get; set; } = StatusTarefa.Pendente;
         public int UsuariaId { get; set; }
     }
 }

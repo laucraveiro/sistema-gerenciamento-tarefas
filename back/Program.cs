@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using sistema_gerenciamento_tarefas.Data.Repositories.Usuarias;
-using sistema_gerenciamento_tarefas.Services.Usuarias;
 using sistema_gerenciamento_tarefas.Data;
 using sistema_gerenciamento_tarefas.Data.Repositories.Tarefas;
+using sistema_gerenciamento_tarefas.Data.Repositories.Usuarias;
+using sistema_gerenciamento_tarefas.Services.Tarefas;
+using sistema_gerenciamento_tarefas.Services.Usuarias;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.AddSwaggerGen();
 //**********BANCO EM MEMORIA**********************
 
 builder.Services.AddScoped<IUsuariaService, UsuariaService>();
+builder.Services.AddScoped<ITarefaService, TarefaService>();
 
 var app = builder.Build();
 
