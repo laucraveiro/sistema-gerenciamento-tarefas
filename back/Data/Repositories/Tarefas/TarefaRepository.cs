@@ -74,5 +74,10 @@ namespace sistema_gerenciamento_tarefas.Data.Repositories.Tarefas
             _context.Tarefas.Remove(tarefa);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Tarefa>> ListarTodasAsync()
+        {
+            return await _context.Tarefas.ToListAsync();
+        }
     }
 }

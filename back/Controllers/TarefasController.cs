@@ -56,6 +56,26 @@ namespace sistema_gerenciamento_tarefas.Controllers
             }
         }
 
+        [HttpGet("~/api/tarefas")]
+        [ProducesResponseType(typeof(TarefaResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ListarTodasTarefas()
+        {
+            var tarefas = await _tarefaService.ListarTodasTarefas();
+
+            var response = tarefas.Select(t => new TarefaResponse
+            {
+                Id = t.Id,
+                Titulo = t.Titulo,
+                Descricao = t.Descricao,
+                DataVencimento = t.DataVencimento,
+                Status = t.Status.ToString(),
+                UsuariaId = t.UsuariaId
+            });
+
+            return Ok(response);
+        }
+
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<TarefaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

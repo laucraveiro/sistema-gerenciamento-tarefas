@@ -119,5 +119,10 @@ namespace sistema_gerenciamento_tarefas.Services.Tarefas
 
             await _tarefaRepository.RemoverAsync(tarefaExistente);
         }
+
+        public async Task<List<Tarefa>> ListarTodasTarefas()
+        {
+            return await _tarefaRepository.ListarTodasAsync();
+        }
     }
 }

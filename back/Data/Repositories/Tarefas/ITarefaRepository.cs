@@ -3,6 +3,8 @@ namespace sistema_gerenciamento_tarefas.Data.Repositories.Tarefas
 {
     public interface ITarefaRepository
     {
+        Task<List<Tarefa>> ListarTodasAsync();
+
         Task<List<Tarefa>> BuscarPorUsuariaAsync(int usuariaId);
 
         Task<Tarefa?> BuscarPorIdAsync(
