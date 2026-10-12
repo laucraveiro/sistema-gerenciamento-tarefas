@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using sistema_gerenciamento_tarefas.Models;
 
 namespace sistema_gerenciamento_tarefas.Data.Repositories.Usuarias

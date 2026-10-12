@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using sistema_gerenciamento_tarefas.Models;
 
 namespace sistema_gerenciamento_tarefas.Data.Repositories.Tarefas
@@ -73,6 +73,11 @@ namespace sistema_gerenciamento_tarefas.Data.Repositories.Tarefas
 
             _context.Tarefas.Remove(tarefa);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Tarefa>> ListarTodasAsync()
+        {
+            return await _context.Tarefas.ToListAsync();
         }
     }
 }
