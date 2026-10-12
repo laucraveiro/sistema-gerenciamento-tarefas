@@ -1,0 +1,265 @@
+<div class="tarefas-container">
+  <!-- Cabeçalho do usuário -->
+  <header class="user-header">
+    <div class="user-info" *ngIf="usuarioId">
+      <div class="avatar-badge">{{ usuarioNome.charAt(0).toUpperCase() }}</div>
+      <div>
+        <h2 class="user-title">Tarefas de {{ usuarioNome }}</h2>
+        <span class="user-subtitle">Usuária ID: #{{ usuarioId }}</span>
+      </div>
+    </div>
+
+    <div class="user-actions" *ngIf="usuarioId">
+      <button type="button" class="btn btn-secondary" (click)="carregarTarefas()" [disabled]="carregando">
+        🔄 Atualizar Lista
+      </button>
+      <button type="button" class="btn btn-outline" (click)="sair()">
+        🚪 Trocar / Sair
+      </button>
+    </div>
+  </header>
+
+  <!-- Mensagens de Feedback -->
+  <div class="alert alert-success" *ngIf="mensagemSucesso">
+    <span>✅ {{ mensagemSucesso }}</span>
+    <button class="alert-close" (click)="mensagemSucesso = ''">×</button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="mensagemErro">
+    <span>⚠️ {{ mensagemErro }}</span>
+    <button class="alert-close" (click)="mensagemErro = ''">×</button>
+  </div>
+
+  <!-- Alerta quando não há usuário logado no localStorage -->
+  <section class="card login-prompt-card" *ngIf="!usuarioId">
+    <div class="login-prompt-header">
+      <span class="prompt-icon">👤</span>
+      <h3>Nenhuma usuária logada</h3>
+    </div>
+    <p>Para visualizar e gerenciar as tarefas, faça login ou escolha uma das usuárias cadastradas abaixo:</p>
+    
+    <div class="user-quick-select" *ngIf="usuariasDisponiveis.length > 0">
+      <button
+        *ngFor="let usuaria of usuariasDisponiveis"
+        type="button"
+        class="btn btn-secondary user-chip"
+        (click)="selecionarUsuaria(usuaria)"
+      >
+        Entrar como <strong>{{ usuaria.nome }}</strong> (ID: {{ usuaria.id }})
+      </button>
+    </div>
+
+    <div class="prompt-actions">
+      <button type="button" class="btn btn-primary" (click)="sair()">
+        Ir para Tela de Login
+      </button>
+    </div>
+  </section>
+
+  <!-- Conteúdo Principal quando há usuário -->
+  <div *ngIf="usuarioId">
+    <!-- Formulário Nova Tarefa -->
+    <section class="card form-card">
+      <div class="card-header">
+        <h3>➕ Nova Tarefa</h3>
+        <span class="card-hint">Preencha os campos para cadastrar uma nova tarefa</span>
+      </div>
+
+      <form (ngSubmit)="salvarNovaTarefa()" class="task-form">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="titulo">Título *</label>
+            <input
+              type="text"
+              id="titulo"
+              name="titulo"
+              placeholder="Ex: Entregar relatório do projeto"
+              [(ngModel)]="novaTarefa.titulo"
+              required
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="dataVencimento">Data de Vencimento *</label>
+            <input
+              type="date"
+              id="dataVencimento"
+              name="dataVencimento"
+              [(ngModel)]="novaTarefa.dataVencimento"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao">Descrição *</label>
+          <textarea
+            id="descricao"
+            name="descricao"
+            rows="3"
+            placeholder="Detalhes sobre a tarefa a ser executada..."
+            [(ngModel)]="novaTarefa.descricao"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="carregando || !novaTarefa.titulo || !novaTarefa.descricao || !novaTarefa.dataVencimento"
+          >
+            {{ carregando ? 'Salvando...' : '💾 Cadastrar Tarefa' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Lista de Tarefas -->
+    <section class="card list-card">
+      <div class="card-header list-header">
+        <div>
+          <h3>📋 Tarefas Cadastradas</h3>
+          <span class="card-hint">Total: {{ tarefas.length }} tarefa(s) encontrada(s)</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="empty-state" *ngIf="carregando && tarefas.length === 0">
+        <div class="spinner"></div>
+        <p>Carregando tarefas...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!carregando && tarefas.length === 0">
+        <span class="empty-icon">📭</span>
+        <h4>Nenhuma tarefa cadastrada para esta usuária.</h4>
+        <p>Utilize o formulário acima para criar sua primeira tarefa!</p>
+      </div>
+
+      <!-- Grid de Tarefas -->
+      <div class="tasks-grid" *ngIf="tarefas.length > 0">
+        <article
+          class="task-item"
+          *ngFor="let tarefa of tarefas"
+          [class.task-done]="isConcluida(tarefa.status)"
+        >
+          <div class="task-top">
+            <div class="task-title-group">
+              <span class="badge" [ngClass]="'status-' + (tarefa.status | lowercase)">
+                {{ isConcluida(tarefa.status) ? 'Concluída' : (tarefa.status || 'Pendente') }}
+              </span>
+              <h4 class="task-title">{{ tarefa.titulo }}</h4>
+            </div>
+            <span class="task-id">#{{ tarefa.id }}</span>
+          </div>
+
+          <p class="task-desc">{{ tarefa.descricao }}</p>
+
+          <div class="task-meta">
+            <span class="due-date">
+              📅 <strong>Vence em:</strong> {{ formatarData(tarefa.dataVencimento) }}
+            </span>
+          </div>
+
+          <div class="task-actions">
+            <!-- Concluir -->
+            <button
+              type="button"
+              class="btn btn-sm btn-success"
+              *ngIf="!isConcluida(tarefa.status)"
+              (click)="concluirTarefa(tarefa)"
+              [disabled]="carregando"
+              title="Marcar como concluída"
+            >
+              ✔️ Concluir
+            </button>
+            <span class="badge badge-done-label" *ngIf="isConcluida(tarefa.status)">
+              ✅ Concluída
+            </span>
+
+            <!-- Editar -->
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="iniciarEdicao(tarefa)"
+              [disabled]="carregando"
+              title="Editar dados da tarefa"
+            >
+              ✏️ Editar
+            </button>
+
+            <!-- Excluir -->
+            <button
+              type="button"
+              class="btn btn-sm btn-danger"
+              (click)="excluirTarefa(tarefa)"
+              [disabled]="carregando"
+              title="Excluir tarefa"
+            >
+              🗑️ Excluir
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div class="modal-backdrop" *ngIf="tarefaEmEdicao" (click)="cancelarEdicao()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>✏️ Editar Tarefa #{{ tarefaEmEdicao.id }}</h3>
+        <button type="button" class="modal-close" (click)="cancelarEdicao()">×</button>
+      </div>
+
+      <form (ngSubmit)="salvarEdicao()" class="task-form">
+        <div class="form-group">
+          <label for="edit-titulo">Título *</label>
+          <input
+            type="text"
+            id="edit-titulo"
+            name="edit-titulo"
+            [(ngModel)]="dadosEdicao.titulo"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-dataVencimento">Data de Vencimento *</label>
+          <input
+            type="date"
+            id="edit-dataVencimento"
+            name="edit-dataVencimento"
+            [(ngModel)]="dadosEdicao.dataVencimento"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-descricao">Descrição *</label>
+          <textarea
+            id="edit-descricao"
+            name="edit-descricao"
+            rows="3"
+            [(ngModel)]="dadosEdicao.descricao"
+            required
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelarEdicao()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="carregando || !dadosEdicao.titulo || !dadosEdicao.descricao || !dadosEdicao.dataVencimento"
+          >
+            {{ carregando ? 'Salvando...' : 'Salvar Alterações' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

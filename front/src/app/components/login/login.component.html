@@ -1,0 +1,65 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-circle">📝</div>
+      <h2>Sistema de Tarefas</h2>
+      <p class="subtitle">Faça login para gerenciar suas tarefas</p>
+    </div>
+
+    <!-- Mensagens -->
+    <div class="alert alert-success" *ngIf="mensagemSucesso">
+      {{ mensagemSucesso }}
+    </div>
+
+    <div class="alert alert-error" *ngIf="mensagemErro">
+      {{ mensagemErro }}
+    </div>
+
+    <form (ngSubmit)="fazerLogin()" class="login-form">
+      <div class="form-group">
+        <label for="login-nome">Nome da Usuária</label>
+        <input
+          type="text"
+          id="login-nome"
+          name="login-nome"
+          [(ngModel)]="nome"
+          placeholder="Ex: maria"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="login-senha">Senha</label>
+        <input
+          type="password"
+          id="login-senha"
+          name="login-senha"
+          [(ngModel)]="senha"
+          placeholder="Ex: 12345"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="carregando || !nome || !senha">
+        {{ carregando ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <!-- Atalho rápido para testes -->
+    <div class="test-users-section" *ngIf="usuariasDisponiveis.length > 0">
+      <div class="divider">
+        <span>ou clique para entrar direto</span>
+      </div>
+      <div class="chips-container">
+        <button
+          *ngFor="let u of usuariasDisponiveis"
+          type="button"
+          class="user-test-btn"
+          (click)="selecionarDireto(u)"
+        >
+          👤 {{ u.nome }} (ID: {{ u.id }})
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
