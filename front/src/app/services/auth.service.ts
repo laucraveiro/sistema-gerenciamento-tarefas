@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Usuaria } from '../models/tarefa.model';
 
+export const SENHA_PADRAO = '12345';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -56,11 +58,23 @@ export class AuthService {
     localStorage.removeItem('usuario');
   }
 
-  login(nome: string, senha: string):Observable<Usuaria> {
-    return this.http.post<Usuaria>(`${this.apiUrl}/usuarias/login`, { nome, senha });
+
+  cadastrar(nome: string, email: string): Observable<Usuaria> {
+    return this.http.post<Usuaria>(`${this.apiUrl}/usuarias`, {
+      nome: nome.trim().toLowerCase(),
+      email: email.trim(),
+      senha: SENHA_PADRAO,
+    });
+  }
+
+  login(nome: string, senha: string): Observable<Usuaria> {
+    return this.http.post<Usuaria>(`${this.apiUrl}/usuarias/login`, {
+      nome: nome.trim().toLowerCase(),
+      senha,
+    });
   }
 
   listarUsuarias(): Observable<Usuaria[]> {
-    return this.http.get<Usuaria[]>(`${this.apiUrl}/usuarias`);
-  }
+  return this.http.get<Usuaria[]>(`${this.apiUrl}/usuarias`);
+}
 }

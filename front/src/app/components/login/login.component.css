@@ -124,47 +124,7 @@
   border: 1px solid #fecaca;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
+.link-alternativo {
+  margin: 1.25rem 0 0;
   text-align: center;
-  margin: 1.5rem 0 1rem 0;
-  color: #94a3b8;
-  font-size: 0.8rem;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.divider span {
-  padding: 0 0.5rem;
-}
-
-.chips-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.user-test-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
-}
-
-.user-test-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
 }
