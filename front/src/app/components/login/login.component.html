@@ -7,26 +7,27 @@
     </div>
 
     <!-- Mensagens -->
-    <div class="alert alert-success" *ngIf="mensagemSucesso">
-      {{ mensagemSucesso }}
+    <div class="alert alert-success" *ngIf="mensagemSucesso()">
+      {{ mensagemSucesso() }}
     </div>
 
-    <div class="alert alert-error" *ngIf="mensagemErro">
-      {{ mensagemErro }}
+    <div class="alert alert-error" *ngIf="mensagemErro()">
+      {{ mensagemErro() }}
     </div>
 
     <form (ngSubmit)="fazerLogin()" class="login-form">
       <div class="form-group">
-        <label for="login-nome">Nome da Usuária</label>
-        <input
-          type="text"
-          id="login-nome"
-          name="login-nome"
-          [(ngModel)]="nome"
-          placeholder="Ex: maria"
-          required
-        />
-      </div>
+  <label for="login-nome">Nome da Usuária</label>
+  <input
+    type="text"
+    id="login-nome"
+    name="login-nome"
+    [(ngModel)]="nome"
+    placeholder="Ex: maria"
+    autocomplete="username"
+    required
+  />
+</div>
 
       <div class="form-group">
         <label for="login-senha">Senha</label>
@@ -35,31 +36,21 @@
           id="login-senha"
           name="login-senha"
           [(ngModel)]="senha"
-          placeholder="Ex: 12345"
+          placeholder="Digite sua senha"
+          autocomplete="current-password"
           required
         />
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="carregando || !nome || !senha">
-        {{ carregando ? 'Entrando...' : 'Entrar' }}
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="carregando() || !nome || !senha"
+      >
+        {{ carregando() ? 'Entrando...' : 'Entrar' }}
       </button>
     </form>
 
-    <!-- Atalho rápido para testes -->
-    <div class="test-users-section" *ngIf="usuariasDisponiveis.length > 0">
-      <div class="divider">
-        <span>ou clique para entrar direto</span>
-      </div>
-      <div class="chips-container">
-        <button
-          *ngFor="let u of usuariasDisponiveis"
-          type="button"
-          class="user-test-btn"
-          (click)="selecionarDireto(u)"
-        >
-          👤 {{ u.nome }} (ID: {{ u.id }})
-        </button>
-      </div>
-    </div>
+    <p class="link-alternativo">Ainda não tem cadastro? <a routerLink="/cadastro">Cadastrar</a></p>
   </div>
 </div>

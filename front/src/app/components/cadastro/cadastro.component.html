@@ -1,0 +1,53 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-circle">📝</div>
+      <h2>Sistema de Tarefas</h2>
+      <p class="subtitle">Crie seu cadastro para gerenciar suas tarefas</p>
+    </div>
+
+    <div class="alert alert-success" *ngIf="mensagemSucesso()">
+      {{ mensagemSucesso() }}
+    </div>
+
+    <div class="alert alert-error" *ngIf="mensagemErro()">
+      {{ mensagemErro() }}
+    </div>
+
+    <form (ngSubmit)="cadastrar()" class="login-form">
+      <div class="form-group">
+        <label for="cadastro-nome">Nome da Usuária</label>
+        <input
+          type="text"
+          id="cadastro-nome"
+          name="cadastro-nome"
+          [(ngModel)]="nome"
+          placeholder="Ex: maria"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cadastro-email">E-mail</label>
+        <input
+          type="email"
+          id="cadastro-email"
+          name="cadastro-email"
+          [(ngModel)]="email"
+          placeholder="Ex: maria@email.com"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="carregando() || !nome || !email"
+      >
+        {{ carregando() ? 'Cadastrando...' : 'Cadastrar' }}
+      </button>
+    </form>
+
+    <p class="link-alternativo">Já tem cadastro? <a routerLink="/login">Entrar</a></p>
+  </div>
+</div>
