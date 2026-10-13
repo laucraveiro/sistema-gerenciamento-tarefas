@@ -1,53 +1,42 @@
 <div class="tarefas-container">
   <!-- Cabeçalho do usuário -->
   <header class="user-header">
-    <div class="user-info" *ngIf="usuarioId">
-      <div class="avatar-badge">{{ usuarioNome.charAt(0).toUpperCase() }}</div>
+    <div class="user-info" *ngIf="usuarioId()">
+      <div class="avatar-badge">{{ usuarioNome().charAt(0).toUpperCase() }}</div>
       <div>
-        <h2 class="user-title">Tarefas de {{ usuarioNome }}</h2>
-        <span class="user-subtitle">Usuária ID: #{{ usuarioId }}</span>
+        <h2 class="user-title">Tarefas de {{ usuarioNome() }}</h2>
+        <span class="user-subtitle">Usuária ID: #{{ usuarioId() }}</span>
       </div>
     </div>
 
-    <div class="user-actions" *ngIf="usuarioId">
-      <button type="button" class="btn btn-secondary" (click)="carregarTarefas()" [disabled]="carregando">
+    <div class="user-actions" *ngIf="usuarioId()">
+      <button type="button" class="btn btn-secondary" (click)="carregarTarefas()" [disabled]="carregando()">
         🔄 Atualizar Lista
       </button>
       <button type="button" class="btn btn-outline" (click)="sair()">
-        🚪 Trocar / Sair
+        🚪 Sair
       </button>
     </div>
   </header>
 
   <!-- Mensagens de Feedback -->
-  <div class="alert alert-success" *ngIf="mensagemSucesso">
-    <span>✅ {{ mensagemSucesso }}</span>
-    <button class="alert-close" (click)="mensagemSucesso = ''">×</button>
+  <div class="alert alert-success" *ngIf="mensagemSucesso()">
+    <span>✅ {{ mensagemSucesso() }}</span>
+    <button type="button" class="alert-close" (click)="mensagemSucesso.set('')">×</button>
   </div>
 
-  <div class="alert alert-error" *ngIf="mensagemErro">
-    <span>⚠️ {{ mensagemErro }}</span>
-    <button class="alert-close" (click)="mensagemErro = ''">×</button>
+  <div class="alert alert-error" *ngIf="mensagemErro()">
+    <span>⚠️ {{ mensagemErro() }}</span>
+    <button type="button" class="alert-close" (click)="mensagemErro.set('')">×</button>
   </div>
 
   <!-- Alerta quando não há usuário logado no localStorage -->
-  <section class="card login-prompt-card" *ngIf="!usuarioId">
+  <section class="card login-prompt-card" *ngIf="!usuarioId()">
     <div class="login-prompt-header">
       <span class="prompt-icon">👤</span>
       <h3>Nenhuma usuária logada</h3>
     </div>
-    <p>Para visualizar e gerenciar as tarefas, faça login.</p>
-    
-    <div class="user-quick-select" *ngIf="usuariasDisponiveis.length > 0">
-      <button
-        *ngFor="let usuaria of usuariasDisponiveis"
-        type="button"
-        class="btn btn-secondary user-chip"
-        (click)="selecionarUsuaria(usuaria)"
-      >
-        Entrar como <strong>{{ usuaria.nome }}</strong> (ID: {{ usuaria.id }})
-      </button>
-    </div>
+    <p>Para visualizar e gerenciar suas tarefas, faça login.</p>
 
     <div class="prompt-actions">
       <button type="button" class="btn btn-primary" (click)="sair()">
@@ -57,7 +46,7 @@
   </section>
 
   <!-- Conteúdo Principal quando há usuário -->
-  <div *ngIf="usuarioId">
+  <div *ngIf="usuarioId()">
     <!-- Formulário Nova Tarefa -->
     <section class="card form-card">
       <div class="card-header">
@@ -107,9 +96,9 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="carregando || !novaTarefa.titulo || !novaTarefa.descricao || !novaTarefa.dataVencimento"
+            [disabled]="carregando() || !novaTarefa.titulo || !novaTarefa.descricao || !novaTarefa.dataVencimento"
           >
-            {{ carregando ? 'Salvando...' : '💾 Cadastrar Tarefa' }}
+            {{ carregando() ? 'Salvando...' : '💾 Cadastrar Tarefa' }}
           </button>
         </div>
       </form>
@@ -120,28 +109,28 @@
       <div class="card-header list-header">
         <div>
           <h3>📋 Tarefas Cadastradas</h3>
-          <span class="card-hint">Total: {{ tarefas.length }} tarefa(s) encontrada(s)</span>
+          <span class="card-hint">Total: {{ tarefas().length }} tarefa(s) encontrada(s)</span>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div class="empty-state" *ngIf="carregando && tarefas.length === 0">
+      <div class="empty-state" *ngIf="carregando() && tarefas().length === 0">
         <div class="spinner"></div>
         <p>Carregando tarefas...</p>
       </div>
 
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="!carregando && tarefas.length === 0">
+      <div class="empty-state" *ngIf="!carregando() && tarefas().length === 0">
         <span class="empty-icon">📭</span>
         <h4>Nenhuma tarefa cadastrada para esta usuária.</h4>
         <p>Utilize o formulário acima para criar sua primeira tarefa!</p>
       </div>
 
       <!-- Grid de Tarefas -->
-      <div class="tasks-grid" *ngIf="tarefas.length > 0">
+      <div class="tasks-grid" *ngIf="tarefas().length > 0">
         <article
           class="task-item"
-          *ngFor="let tarefa of tarefas"
+          *ngFor="let tarefa of tarefas()"
           [class.task-done]="isConcluida(tarefa.status)"
         >
           <div class="task-top">
@@ -169,7 +158,7 @@
               class="btn btn-sm btn-success"
               *ngIf="!isConcluida(tarefa.status)"
               (click)="concluirTarefa(tarefa)"
-              [disabled]="carregando"
+              [disabled]="carregando()"
               title="Marcar como concluída"
             >
               ✔️ Concluir
@@ -183,7 +172,7 @@
               type="button"
               class="btn btn-sm btn-outline-primary"
               (click)="iniciarEdicao(tarefa)"
-              [disabled]="carregando"
+              [disabled]="carregando()"
               title="Editar dados da tarefa"
             >
               ✏️ Editar
@@ -194,7 +183,7 @@
               type="button"
               class="btn btn-sm btn-danger"
               (click)="excluirTarefa(tarefa)"
-              [disabled]="carregando"
+              [disabled]="carregando()"
               title="Excluir tarefa"
             >
               🗑️ Excluir
@@ -206,10 +195,10 @@
   </div>
 
   <!-- Modal de Edição -->
-  <div class="modal-backdrop" *ngIf="tarefaEmEdicao" (click)="cancelarEdicao()">
+  <div class="modal-backdrop" *ngIf="tarefaEmEdicao() as tarefaAtual" (click)="cancelarEdicao()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>✏️ Editar Tarefa #{{ tarefaEmEdicao.id }}</h3>
+        <h3>✏️ Editar Tarefa #{{ tarefaAtual.id }}</h3>
         <button type="button" class="modal-close" (click)="cancelarEdicao()">×</button>
       </div>
 
@@ -254,9 +243,9 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="carregando || !dadosEdicao.titulo || !dadosEdicao.descricao || !dadosEdicao.dataVencimento"
+            [disabled]="carregando() || !dadosEdicao.titulo || !dadosEdicao.descricao || !dadosEdicao.dataVencimento"
           >
-            {{ carregando ? 'Salvando...' : 'Salvar Alterações' }}
+            {{ carregando() ? 'Salvando...' : 'Salvar Alterações' }}
           </button>
         </div>
       </form>
