@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TarefaService } from '../../services/tarefa.service';
 import { AuthService } from '../../services/auth.service';
-import { Tarefa, TarefaCadastroRequest, TarefaAtualizacaoRequest, Usuaria } from '../../models/tarefa.model';
+import { Tarefa, TarefaCadastroRequest, TarefaAtualizacaoRequest } from '../../models/tarefa.model';
 
 @Component({
   selector: 'app-tarefas',
@@ -14,17 +14,16 @@ import { Tarefa, TarefaCadastroRequest, TarefaAtualizacaoRequest, Usuaria } from
   styleUrls: ['./tarefas.component.css'],
 })
 export class TarefasComponent implements OnInit {
-  usuarioId: number | null = null;
-  usuarioNome: string = '';
-  tarefas: Tarefa[] = [];
-  carregando: boolean = false;
-  usuariasDisponiveis: Usuaria[] = [];
+  usuarioId = signal<number | null>(null);
+  usuarioNome = signal('');
+  tarefas = signal<Tarefa[]>([]);
+  carregando = signal(false);
 
   // Feedback messages
-  mensagemSucesso: string = '';
-  mensagemErro: string = '';
+  mensagemSucesso = signal('');
+  mensagemErro = signal('');
 
-  // Formulário Nova Tarefa
+  // Formulário Nova Tarefa (objeto comum, por causa do ngModel)
   novaTarefa: TarefaCadastroRequest = {
     titulo: '',
     descricao: '',
@@ -32,7 +31,7 @@ export class TarefasComponent implements OnInit {
   };
 
   // Formulário / Modal Edição
-  tarefaEmEdicao: Tarefa | null = null;
+  tarefaEmEdicao = signal<Tarefa | null>(null);
   dadosEdicao: TarefaAtualizacaoRequest = {
     titulo: '',
     descricao: '',
@@ -42,7 +41,7 @@ export class TarefasComponent implements OnInit {
   constructor(
     private readonly tarefaService: TarefaService,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -53,53 +52,33 @@ export class TarefasComponent implements OnInit {
    * Recupera o usuarioId salvo no login e busca as tarefas
    */
   obterUsuarioEListar(): void {
-    this.usuarioId = this.authService.getUsuarioId();
-    this.usuarioNome = this.authService.getUsuarioNome();
+    this.usuarioId.set(this.authService.getUsuarioId());
+    this.usuarioNome.set(this.authService.getUsuarioNome());
 
-    if (this.usuarioId) {
+    if (this.usuarioId()) {
       this.carregarTarefas();
-    } else {
-      // Carrega usuárias do sistema caso queira selecionar uma para testar
-      this.carregarUsuariasParaSelecao();
     }
-  }
-
-  carregarUsuariasParaSelecao(): void {
-    this.authService.listarUsuarias().subscribe({
-      next: (usuarias) => {
-        this.usuariasDisponiveis = usuarias;
-      },
-      error: () => {
-        // Se a API ainda estiver iniciando ou sem usuárias
-      },
-    });
-  }
-
-  selecionarUsuaria(usuaria: Usuaria): void {
-    this.authService.salvarLogin(usuaria);
-    this.usuarioId = usuaria.id;
-    this.usuarioNome = usuaria.nome;
-    this.limparMensagens();
-    this.carregarTarefas();
   }
 
   /**
    * GET /api/usuarios/{usuarioId}/tarefas
    */
   carregarTarefas(): void {
-    if (!this.usuarioId) {
-      this.mensagemErro = 'Nenhum ID de usuária identificado. Faça login ou selecione uma usuária.';
+    const usuarioId = this.usuarioId();
+
+    if (!usuarioId) {
+      this.mensagemErro.set('Nenhum ID de usuária identificado. Faça login para continuar.');
       return;
     }
 
-    this.carregando = true;
-    this.tarefaService.listarTarefas(this.usuarioId).subscribe({
+    this.carregando.set(true);
+    this.tarefaService.listarTarefas(usuarioId).subscribe({
       next: (tarefas) => {
-        this.tarefas = tarefas;
-        this.carregando = false;
+        this.tarefas.set(tarefas);
+        this.carregando.set(false);
       },
       error: (err) => {
-        this.carregando = false;
+        this.carregando.set(false);
         this.exibirErro(err, 'Erro ao carregar lista de tarefas.');
       },
     });
@@ -111,36 +90,38 @@ export class TarefasComponent implements OnInit {
   salvarNovaTarefa(): void {
     this.limparMensagens();
 
-    if (!this.usuarioId) {
-      this.mensagemErro = 'Usuária não identificada para cadastrar tarefa.';
+    const usuarioId = this.usuarioId();
+
+    if (!usuarioId) {
+      this.mensagemErro.set('Usuária não identificada para cadastrar tarefa.');
       return;
     }
 
     if (!this.novaTarefa.titulo.trim()) {
-      this.mensagemErro = 'Por favor, informe o título da tarefa.';
+      this.mensagemErro.set('Por favor, informe o título da tarefa.');
       return;
     }
 
     if (!this.novaTarefa.descricao.trim()) {
-      this.mensagemErro = 'Por favor, informe a descrição da tarefa.';
+      this.mensagemErro.set('Por favor, informe a descrição da tarefa.');
       return;
     }
 
     if (!this.novaTarefa.dataVencimento) {
-      this.mensagemErro = 'Por favor, informe a data de vencimento da tarefa.';
+      this.mensagemErro.set('Por favor, informe a data de vencimento da tarefa.');
       return;
     }
 
-    this.carregando = true;
-    this.tarefaService.criarTarefa(this.usuarioId, this.novaTarefa).subscribe({
+    this.carregando.set(true);
+    this.tarefaService.criarTarefa(usuarioId, this.novaTarefa).subscribe({
       next: () => {
-        this.carregando = false;
-        this.mensagemSucesso = 'Tarefa cadastrada com sucesso!';
+        this.carregando.set(false);
+        this.mensagemSucesso.set('Tarefa cadastrada com sucesso!');
         this.limparFormularioNovaTarefa();
         this.carregarTarefas();
       },
       error: (err) => {
-        this.carregando = false;
+        this.carregando.set(false);
         this.exibirErro(err, 'Erro ao cadastrar tarefa.');
       },
     });
@@ -151,7 +132,7 @@ export class TarefasComponent implements OnInit {
    */
   iniciarEdicao(tarefa: Tarefa): void {
     this.limparMensagens();
-    this.tarefaEmEdicao = tarefa;
+    this.tarefaEmEdicao.set(tarefa);
 
     // Formata a data para YYYY-MM-DD para o input type="date"
     let dataFormatada = '';
@@ -167,7 +148,7 @@ export class TarefasComponent implements OnInit {
   }
 
   cancelarEdicao(): void {
-    this.tarefaEmEdicao = null;
+    this.tarefaEmEdicao.set(null);
   }
 
   /**
@@ -176,40 +157,41 @@ export class TarefasComponent implements OnInit {
   salvarEdicao(): void {
     this.limparMensagens();
 
-    if (!this.usuarioId || !this.tarefaEmEdicao) {
+    const usuarioId = this.usuarioId();
+    const tarefaEmEdicao = this.tarefaEmEdicao();
+
+    if (!usuarioId || !tarefaEmEdicao) {
       return;
     }
 
     if (!this.dadosEdicao.titulo.trim()) {
-      this.mensagemErro = 'O título não pode ficar vazio.';
+      this.mensagemErro.set('O título não pode ficar vazio.');
       return;
     }
 
     if (!this.dadosEdicao.descricao.trim()) {
-      this.mensagemErro = 'A descrição não pode ficar vazia.';
+      this.mensagemErro.set('A descrição não pode ficar vazia.');
       return;
     }
 
     if (!this.dadosEdicao.dataVencimento) {
-      this.mensagemErro = 'A data de vencimento é obrigatória.';
+      this.mensagemErro.set('A data de vencimento é obrigatória.');
       return;
     }
 
-    this.carregando = true;
-    this.tarefaService
-      .atualizarTarefa(this.usuarioId, this.tarefaEmEdicao.id, this.dadosEdicao)
-      .subscribe({
-        next: () => {
-          this.carregando = false;
-          this.mensagemSucesso = 'Tarefa atualizada com sucesso!';
-          this.tarefaEmEdicao = null;
-          this.carregarTarefas();
-        },
-        error: (err) => {
-          this.carregando = false;
-          this.exibirErro(err, 'Erro ao atualizar a tarefa.');
-        },
-      });
+    this.carregando.set(true);
+    this.tarefaService.atualizarTarefa(usuarioId, tarefaEmEdicao.id, this.dadosEdicao).subscribe({
+      next: () => {
+        this.carregando.set(false);
+        this.mensagemSucesso.set('Tarefa atualizada com sucesso!');
+        this.tarefaEmEdicao.set(null);
+        this.carregarTarefas();
+      },
+      error: (err) => {
+        this.carregando.set(false);
+        this.exibirErro(err, 'Erro ao atualizar a tarefa.');
+      },
+    });
   }
 
   /**
@@ -218,19 +200,21 @@ export class TarefasComponent implements OnInit {
   concluirTarefa(tarefa: Tarefa): void {
     this.limparMensagens();
 
-    if (!this.usuarioId) {
+    const usuarioId = this.usuarioId();
+
+    if (!usuarioId) {
       return;
     }
 
-    this.carregando = true;
-    this.tarefaService.concluirTarefa(this.usuarioId, tarefa.id).subscribe({
+    this.carregando.set(true);
+    this.tarefaService.concluirTarefa(usuarioId, tarefa.id).subscribe({
       next: () => {
-        this.carregando = false;
-        this.mensagemSucesso = `Tarefa "${tarefa.titulo}" marcada como concluída!`;
+        this.carregando.set(false);
+        this.mensagemSucesso.set(`Tarefa "${tarefa.titulo}" marcada como concluída!`);
         this.carregarTarefas();
       },
       error: (err) => {
-        this.carregando = false;
+        this.carregando.set(false);
         this.exibirErro(err, 'Erro ao concluir tarefa.');
       },
     });
@@ -243,27 +227,29 @@ export class TarefasComponent implements OnInit {
   excluirTarefa(tarefa: Tarefa): void {
     this.limparMensagens();
 
-    if (!this.usuarioId) {
+    const usuarioId = this.usuarioId();
+
+    if (!usuarioId) {
       return;
     }
 
     const confirmou = window.confirm(
-      `Tem certeza que deseja excluir a tarefa "${tarefa.titulo}"? Esta ação não pode ser desfeita.`
+      `Tem certeza que deseja excluir a tarefa "${tarefa.titulo}"? Esta ação não pode ser desfeita.`,
     );
 
     if (!confirmou) {
       return;
     }
 
-    this.carregando = true;
-    this.tarefaService.excluirTarefa(this.usuarioId, tarefa.id).subscribe({
+    this.carregando.set(true);
+    this.tarefaService.excluirTarefa(usuarioId, tarefa.id).subscribe({
       next: () => {
-        this.carregando = false;
-        this.mensagemSucesso = `Tarefa "${tarefa.titulo}" excluída com sucesso!`;
+        this.carregando.set(false);
+        this.mensagemSucesso.set(`Tarefa "${tarefa.titulo}" excluída com sucesso!`);
         this.carregarTarefas();
       },
       error: (err) => {
-        this.carregando = false;
+        this.carregando.set(false);
         this.exibirErro(err, 'Erro ao excluir tarefa.');
       },
     });
@@ -271,9 +257,9 @@ export class TarefasComponent implements OnInit {
 
   sair(): void {
     this.authService.logout();
-    this.usuarioId = null;
-    this.usuarioNome = '';
-    this.tarefas = [];
+    this.usuarioId.set(null);
+    this.usuarioNome.set('');
+    this.tarefas.set([]);
     this.limparMensagens();
     this.router.navigate(['/login']);
   }
@@ -287,8 +273,8 @@ export class TarefasComponent implements OnInit {
   }
 
   limparMensagens(): void {
-    this.mensagemSucesso = '';
-    this.mensagemErro = '';
+    this.mensagemSucesso.set('');
+    this.mensagemErro.set('');
   }
 
   formatarData(data: string): string {
@@ -320,6 +306,6 @@ export class TarefasComponent implements OnInit {
       detalhe = err.message;
     }
 
-    this.mensagemErro = detalhe ? `${mensagemPadrao} (${detalhe})` : mensagemPadrao;
+    this.mensagemErro.set(detalhe ? `${mensagemPadrao} (${detalhe})` : mensagemPadrao);
   }
 }

@@ -283,18 +283,6 @@
   font-size: 3rem;
 }
 
-.user-quick-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  margin: 1.5rem 0;
-}
-
-.user-chip {
-  padding: 0.6rem 1rem;
-}
-
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -512,3 +500,4 @@
   gap: 0.75rem;
   margin-top: 1rem;
 }
+

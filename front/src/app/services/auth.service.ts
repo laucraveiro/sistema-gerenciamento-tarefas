@@ -73,8 +73,5 @@ export class AuthService {
       senha,
     });
   }
+}
 
-  listarUsuarias(): Observable<Usuaria[]> {
-  return this.http.get<Usuaria[]>(`${this.apiUrl}/usuarias`);
-}
-}
